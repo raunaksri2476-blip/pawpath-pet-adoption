@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PawPath — Pet Adoption & Shelter Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --soil:      #0f110e;
+  --humus:     #171b15;
+  --bark:      #1f261c;
+  --moss:      #283323;
+  --lichen:    #334029;
+  --cream:     #ede8de;
+  --sand:      #c4bba8;
+  --dust:      #7a7060;
+  --stone:     #3d4038;
+  --fern:      #6ecf78;
+  --fern2:     #4dae57;
+  --fern-glow: rgba(110,207,120,.12);
+  --amber:     #e8b84a;
+  --terracotta:#d4714a;
+  --sky:       #7ab8d4;
+  --line:      rgba(255,255,255,.055);
+  --line2:     rgba(255,255,255,.10);
+  --line3:     rgba(255,255,255,.16);
+  --r:  18px;
+  --r2: 10px;
+}
+ 
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+ 
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--soil);
+  color: var(--cream);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+ 
+/* ── BUTTONS ─────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 20px; border-radius: 30px; border: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all .2s; white-space: nowrap;
+}
+.btn-fern   { background: var(--fern); color: var(--soil); }
+.btn-fern:hover { background: var(--fern2); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(110,207,120,.28); }
+.btn-ghost  { background: transparent; border: 1px solid var(--line2); color: var(--sand); }
+.btn-ghost:hover { background: var(--bark); color: var(--cream); border-color: var(--line3); }
+.btn-danger { background: rgba(212,113,74,.12); border: 1px solid rgba(212,113,74,.25); color: var(--terracotta); }
+.btn-danger:hover { background: rgba(212,113,74,.22); }
+.btn-sm { padding: 6px 14px; font-size: 12.5px; }
+.btn-xs { padding: 4px 11px; font-size: 11.5px; border-radius: 20px; }
+ 
+/* ── BADGES ──────────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 11px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; white-space: nowrap;
+}
+.b-g { background: rgba(110,207,120,.12); color: var(--fern);        border: 1px solid rgba(110,207,120,.22); }
+.b-r { background: rgba(212,113,74,.12);  color: var(--terracotta);  border: 1px solid rgba(212,113,74,.22); }
+.b-a { background: rgba(232,184,74,.12);  color: var(--amber);       border: 1px solid rgba(232,184,74,.22); }
+.b-s { background: rgba(122,184,212,.12); color: var(--sky);         border: 1px solid rgba(122,184,212,.22); }
+.b-m { background: var(--bark); color: var(--dust); border: 1px solid var(--line2); }
+ 
+/* ══════════════════════════════════════════════
+   SPLASH
+══════════════════════════════════════════════ */
+.splash {
+  position: fixed; inset: 0; background: var(--soil);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999; transition: opacity .5s;
+}
+.splash.off { opacity: 0; pointer-events: none; }
+.splash-inner { text-align: center; }
+.splash-inner span { font-size: 64px; display: block; animation: pawFloat 1.2s ease-in-out infinite; }
+.splash-inner p { font-family: 'Lora', serif; font-size: 20px; font-style: italic; color: var(--sand); margin-top: 14px; }
+ 
+/* ══════════════════════════════════════════════
+   LOGIN PAGE
+══════════════════════════════════════════════ */
+#loginPage {
+  min-height: 100vh; display: flex;
+  align-items: center; justify-content: center; padding: 24px;
+  position: relative;
+}
+ 
+#loginPage::before {
+  content: ''; position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 100% 70% at 10% 100%, rgba(110,207,120,.07) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 90%  at 90% 10%,  rgba(232,184,74,.05)  0%, transparent 50%),
+    var(--soil);
+}
+ 
+.paw-bg {
+  position: fixed; font-size: 28px; opacity: .03;
+  animation: driftUp linear infinite; pointer-events: none; z-index: 0;
+}
+@keyframes driftUp {
+  0%   { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+  10%  { opacity: .03; }
+  90%  { opacity: .03; }
+  100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+}
+ 
+.login-card {
+  position: relative; z-index: 10;
+  width: 420px; max-width: 100%;
+  background: var(--humus);
+  border: 1px solid var(--line2); border-radius: 28px;
+  padding: 44px 40px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.04), 0 40px 100px rgba(0,0,0,.6), 0 0 60px rgba(110,207,120,.08);
+  animation: cardRise .5s cubic-bezier(.34,1.2,.64,1);
+}
+@keyframes cardRise { from { opacity: 0; transform: translateY(28px) scale(.97); } }
+ 
+.login-card::before {
+  content: ''; position: absolute; top: 0; left: 10%; right: 10%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--fern), var(--amber), transparent);
+  border-radius: 0 0 4px 4px;
+}
+ 
+.lc-brand { text-align: center; margin-bottom: 32px; }
+ 
+.lc-paw {
+  font-size: 54px; display: block; margin-bottom: 12px;
+  animation: pawFloat 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 18px rgba(110,207,120,.45));
+}
+ 
+@keyframes pawFloat {
+  0%,100% { transform: translateY(0) rotate(-5deg); filter: drop-shadow(0 0 12px rgba(110,207,120,.35)); }
+  50%     { transform: translateY(-6px) rotate(5deg); filter: drop-shadow(0 0 28px rgba(110,207,120,.6)); }
+}
+ 
+.lc-title { font-family: 'Lora', serif; font-size: 38px; font-weight: 700; line-height: 1; }
+.lc-title em { font-style: italic; color: var(--fern); }
+.lc-sub { font-size: 11px; color: var(--dust); letter-spacing: .12em; text-transform: uppercase; margin-top: 7px; font-weight: 500; }
+ 
+.auth-tabs { display: flex; gap: 3px; background: var(--bark); border-radius: 12px; padding: 4px; margin-bottom: 26px; }
+.at-btn {
+  flex: 1; padding: 9px; border-radius: 9px; border: none;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all .2s; color: var(--dust); background: transparent;
+}
+.at-btn.active { background: var(--fern); color: var(--soil); box-shadow: 0 2px 8px rgba(110,207,120,.3); }
+ 
+.auth-form { display: none; }
+.auth-form.on { display: block; }
+ 
+.fi { margin-bottom: 14px; }
+.fi label { display: block; font-size: 10.5px; font-weight: 700; color: var(--dust); letter-spacing: .09em; text-transform: uppercase; margin-bottom: 6px; }
+.fi input {
+  width: 100%; padding: 11px 15px;
+  background: var(--bark); border: 1.5px solid var(--line2);
+  border-radius: 11px; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px; color: var(--cream); outline: none;
+  transition: border-color .18s, background .18s;
+}
+.fi input:focus { border-color: var(--fern); background: var(--moss); box-shadow: 0 0 0 3px rgba(110,207,120,.08); }
+.fi input::placeholder { color: var(--stone); }
+ 
+.lc-submit {
+  width: 100%; padding: 13px; margin-top: 6px;
+  background: var(--fern); color: var(--soil); border: none; border-radius: 13px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 800;
+  cursor: pointer; transition: all .2s; letter-spacing: .02em;
+}
+.lc-submit:hover { background: var(--fern2); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(110,207,120,.35); }
+ 
+.lc-err { min-height: 20px; font-size: 13px; color: var(--terracotta); text-align: center; margin-top: 10px; }
+.lc-hint { text-align: center; font-size: 12px; color: var(--dust); margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
+.lc-hint b { color: var(--fern); font-weight: 700; }
+ 
+/* ══════════════════════════════════════════════
+   APP LAYOUT
+══════════════════════════════════════════════ */
+#appPage { display: none; }
+#appPage.on { display: flex; min-height: 100vh; }
+ 
+/* ── Sidebar ─────────────────────────────────── */
+.sidebar {
+  width: 252px; min-height: 100vh;
+  background: var(--humus); border-right: 1px solid var(--line);
+  display: flex; flex-direction: column;
+  position: fixed; left: 0; top: 0; bottom: 0; z-index: 200; overflow-y: auto;
+}
+ 
+.sb-head { padding: 26px 20px 18px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+ 
+.sb-logo { display: flex; align-items: center; gap: 11px; }
+ 
+.sb-paw-ico {
+  width: 42px; height: 42px; border-radius: 13px;
+  background: linear-gradient(135deg, var(--fern-glow), rgba(232,184,74,.08));
+  border: 1px solid rgba(110,207,120,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+ 
+.sb-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 700; line-height: 1; }
+.sb-title em { font-style: italic; color: var(--fern); }
+.sb-tagline { font-size: 9.5px; color: var(--dust); letter-spacing: .12em; text-transform: uppercase; margin-top: 4px; }
+ 
+.sb-profile {
+  margin: 14px 18px 0; padding: 11px 14px;
+  background: var(--fern-glow); border: 1px solid rgba(110,207,120,.12);
+  border-radius: 12px; display: flex; align-items: center; gap: 10px;
+}
+.sb-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--fern), var(--fern2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; color: var(--soil); flex-shrink: 0;
+}
+.sb-pname { font-size: 13.5px; font-weight: 700; color: var(--cream); }
+.sb-prole { font-size: 10px; color: var(--fern); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+ 
+.sb-nav { flex: 1; padding: 14px 10px; }
+.sb-glabel { font-size: 9.5px; font-weight: 700; color: var(--stone); letter-spacing: .13em; text-transform: uppercase; padding: 10px 12px 4px; }
+ 
+.sb-link {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 14px; border-radius: 11px;
+  cursor: pointer; color: var(--sand); font-size: 13.5px; font-weight: 600;
+  transition: all .16s; margin-bottom: 2px; position: relative;
+}
+.sb-link:hover { background: var(--bark); color: var(--cream); }
+.sb-link.on {
+  background: linear-gradient(135deg, rgba(110,207,120,.14), rgba(110,207,120,.05));
+  color: var(--fern); font-weight: 700;
+  border: 1px solid rgba(110,207,120,.16);
+}
+.sb-link.on::before {
+  content: ''; position: absolute; left: 0; top: 22%; height: 56%;
+  width: 3px; background: var(--fern); border-radius: 0 4px 4px 0;
+}
+.sb-ico { font-size: 17px; width: 22px; text-align: center; flex-shrink: 0; }
+.sb-nbadge {
+  margin-left: auto; background: var(--amber); color: var(--soil);
+  font-size: 10px; font-weight: 800; border-radius: 20px; padding: 1px 8px; min-width: 22px; text-align: center;
+}
+ 
+.sb-foot {
+  padding: 14px 20px; border-top: 1px solid var(--line); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sb-foot-text { font-size: 10px; color: var(--stone); line-height: 1.8; }
+.btn-logout {
+  padding: 6px 14px; border-radius: 9px; border: 1px solid var(--line2);
+  background: transparent; color: var(--dust);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11.5px; font-weight: 700; cursor: pointer; transition: all .16s;
+}
+.btn-logout:hover { background: rgba(212,113,74,.1); color: var(--terracotta); border-color: rgba(212,113,74,.3); }
+ 
+/* ── Main ────────────────────────────────────── */
+.main { margin-left: 252px; flex: 1; display: flex; flex-direction: column; }
+ 
+.topbar {
+  background: rgba(15,17,14,.82); backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--line);
+  padding: 13px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+}
+.tb-title { font-family: 'Lora', serif; font-size: 21px; font-weight: 600; }
+ 
+.search-bar {
+  display: flex; align-items: center; gap: 9px;
+  background: var(--bark); border: 1px solid var(--line2); border-radius: 26px; padding: 8px 16px;
+  transition: border-color .18s;
+}
+.search-bar:focus-within { border-color: var(--fern); }
+.search-bar input { border: none; background: none; outline: none; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: var(--cream); width: 190px; }
+.search-bar input::placeholder { color: var(--stone); }
+ 
+/* ── Content ─────────────────────────────────── */
+.content { padding: 28px 32px; flex: 1; }
+.page { display: none; animation: pgFade .2s ease; }
+.page.on { display: block; }
+@keyframes pgFade { from { opacity: 0; transform: translateY(7px); } }
+ 
+/* ── Section header ──────────────────────────── */
+.sec-hd { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 22px; gap: 12px; flex-wrap: wrap; }
+.sec-title { font-family: 'Lora', serif; font-size: 30px; font-weight: 700; line-height: 1; }
+.sec-sub { font-size: 13px; color: var(--dust); margin-top: 5px; }
+ 
+.nav-row { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+.rec-ct { font-size: 12px; color: var(--stone); margin-left: auto; }
+ 
+/* ── Stats ───────────────────────────────────── */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px,1fr)); gap: 14px; margin-bottom: 28px; }
+.sc {
+  background: var(--humus); border: 1px solid var(--line); border-radius: var(--r);
+  padding: 20px 18px; position: relative; overflow: hidden;
+  transition: transform .2s, box-shadow .2s; cursor: default;
+}
+.sc:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(0,0,0,.45); }
+.sc-blob { position: absolute; bottom: -28px; right: -28px; width: 90px; height: 90px; border-radius: 50%; opacity: .07; transition: opacity .3s; }
+.sc:hover .sc-blob { opacity: .13; }
+.sc-icon { font-size: 26px; margin-bottom: 11px; }
+.sc-num { font-family: 'Lora', serif; font-size: 40px; font-weight: 700; line-height: 1; }
+.sc-lbl { font-size: 11.5px; color: var(--dust); margin-top: 5px; font-weight: 600; }
+ 
+/* ── Card ────────────────────────────────────── */
+.card { background: var(--humus); border: 1px solid var(--line); border-radius: var(--r); padding: 22px; margin-bottom: 20px; }
+.card-hd {
+  font-family: 'Lora', serif; font-size: 19px; font-weight: 600;
+  margin-bottom: 16px; padding-bottom: 13px; border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+ 
+/* ── Table ───────────────────────────────────── */
+.tw { border: 1px solid var(--line); border-radius: var(--r2); overflow: hidden; overflow-x: auto; background: var(--humus); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead tr { background: var(--bark); }
+th { padding: 11px 14px; text-align: left; white-space: nowrap; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: var(--dust); border-bottom: 1px solid var(--line2); }
+td { padding: 13px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; color: var(--cream); }
+tr:last-child td { border-bottom: none; }
+tbody tr { transition: background .12s; }
+tbody tr:hover td { background: var(--bark); }
+.acts { display: flex; gap: 5px; }
+code { font-size: 11.5px; color: var(--fern); background: var(--fern-glow); padding: 2px 7px; border-radius: 5px; font-family: monospace; }
+ 
+/* ── Modal ───────────────────────────────────── */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,.72); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 500; }
+.overlay.on { display: flex; }
+.modal {
+  background: var(--humus); border: 1px solid var(--line2); border-radius: 22px;
+  padding: 34px 30px; width: 500px; max-width: 95vw;
+  box-shadow: 0 48px 120px rgba(0,0,0,.7), 0 0 60px rgba(110,207,120,.07);
+  animation: mPop .24s cubic-bezier(.34,1.4,.64,1);
+  max-height: 90vh; overflow-y: auto; position: relative;
+}
+.modal::before {
+  content: ''; position: absolute; top: 0; left: 12%; right: 12%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--fern), transparent);
+  border-radius: 0 0 4px 4px;
+}
+@keyframes mPop { from { opacity: 0; transform: scale(.88) translateY(22px); } }
+.modal-title { font-family: 'Lora', serif; font-size: 24px; font-weight: 700; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+ 
+.mfi { margin-bottom: 14px; }
+.mfi label { display: block; font-size: 10.5px; font-weight: 700; color: var(--dust); letter-spacing: .09em; text-transform: uppercase; margin-bottom: 6px; }
+.mfi input, .mfi select {
+  width: 100%; padding: 10px 14px;
+  background: var(--bark); border: 1.5px solid var(--line2); border-radius: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; color: var(--cream); outline: none;
+  transition: border-color .16s, background .16s;
+}
+.mfi input:focus, .mfi select:focus { border-color: var(--fern); background: var(--moss); box-shadow: 0 0 0 3px rgba(110,207,120,.07); }
+.mfi select option { background: var(--humus); }
+.m2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-foot { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); }
+ 
+/* ── Report bars ─────────────────────────────── */
+.rep-bar { display: flex; align-items: center; gap: 14px; padding: 14px 18px; margin-bottom: 10px; background: var(--bark); border-radius: 12px; border: 1px solid var(--line); }
+.rep-lbl { min-width: 165px; font-size: 13.5px; font-weight: 600; }
+.bar-track { flex: 1; height: 9px; background: var(--lichen); border-radius: 9px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 9px; background: linear-gradient(90deg, var(--fern2), var(--fern)); transition: width .9s cubic-bezier(.34,1,.64,1); }
+.rep-pct { min-width: 42px; text-align: right; font-size: 13px; font-weight: 800; color: var(--fern); }
+ 
+/* ── Toast ───────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+  padding: 13px 22px; border-radius: 14px; font-size: 13.5px; font-weight: 700;
+  opacity: 0; pointer-events: none; transform: translateY(14px);
+  transition: all .28s; box-shadow: 0 8px 32px rgba(0,0,0,.4);
+}
+.toast.on { opacity: 1; transform: translateY(0); }
+.t-ok  { background: var(--fern); color: var(--soil); }
+.t-err { background: var(--terracotta); color: #fff; }
+ 
+/* ── Empty state ─────────────────────────────── */
+.empty-row td { text-align: center; padding: 28px; color: var(--stone); }
+</style>
+</head>
+<body>
+ 
+<!-- Splash -->
+<div class="splash" id="splash">
+  <div class="splash-inner">
+    <span>🐾</span>
+    <p>Loading PawPath…</p>
+  </div>
+</div>
+ 
+<!-- Floating paws (login bg) -->
+<div class="paw-bg" style="left:8%;animation-duration:18s;animation-delay:0s">🐾</div>
+<div class="paw-bg" style="left:25%;animation-duration:22s;animation-delay:5s;font-size:22px">🐾</div>
+<div class="paw-bg" style="left:60%;animation-duration:16s;animation-delay:9s">🐾</div>
+<div class="paw-bg" style="left:82%;animation-duration:20s;animation-delay:3s;font-size:24px">🐾</div>
+ 
+<!-- ════════════ LOGIN PAGE ════════════ -->
+<div id="loginPage">
+  <div class="login-card">
+    <div class="lc-brand">
+      <span class="lc-paw">🐾</span>
+      <div class="lc-title">Paw<em>Path</em></div>
+      <div class="lc-sub">Pet Adoption &amp; Shelter Management</div>
+    </div>
+ 
+    <div class="auth-tabs">
+      <button class="at-btn active" onclick="switchTab('login')">Sign In</button>
+      <button class="at-btn" onclick="switchTab('register')">Register</button>
+    </div>
+ 
+    <!-- Login form -->
+    <div class="auth-form on" id="fLogin">
+      <div class="fi"><label>Username</label>
+        <input type="text" id="lUser" placeholder="Enter username" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="fi"><label>Password</label>
+        <input type="password" id="lPass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="lc-submit" onclick="doLogin()">Sign In →</button>
+      <div class="lc-err" id="lErr"></div>
+      <div class="lc-hint">Default: <b>admin</b> / <b>password123</b></div>
+    </div>
+ 
+    <!-- Register form -->
+    <div class="auth-form" id="fReg">
+      <div class="fi"><label>Username</label><input type="text" id="rUser" placeholder="Choose a username"></div>
+      <div class="fi"><label>Email</label><input type="email" id="rEmail" placeholder="you@email.com"></div>
+      <div class="fi"><label>Password</label><input type="password" id="rPass" placeholder="Min 6 characters"></div>
+      <button class="lc-submit" onclick="doRegister()">Create Account →</button>
+      <div class="lc-err" id="rErr"></div>
+    </div>
+  </div>
+</div>
+ 
+<!-- ════════════ APP ════════════ -->
+<div id="appPage">
+ 
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sb-head">
+      <div class="sb-logo">
+        <div class="sb-paw-ico">🐾</div>
+        <div>
+          <div class="sb-title">Paw<em>Path</em></div>
+          <div class="sb-tagline">Shelter Management</div>
+        </div>
+      </div>
+      <div class="sb-profile">
+        <div class="sb-avatar" id="sbAv">A</div>
+        <div>
+          <div class="sb-pname" id="sbName">admin</div>
+          <div class="sb-prole" id="sbRole">Admin</div>
+        </div>
+      </div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-glabel">Overview</div>
+      <div class="sb-link on" onclick="showPage('dashboard')"><span class="sb-ico">🏠</span> Dashboard</div>
+      <div class="sb-glabel">Manage</div>
+      <div class="sb-link" onclick="showPage('shelters')"><span class="sb-ico">🏡</span> Shelters</div>
+      <div class="sb-link" onclick="showPage('pets')"><span class="sb-ico">🐶</span> Pets</div>
+      <div class="sb-link" onclick="showPage('staff')"><span class="sb-ico">👤</span> Staff</div>
+      <div class="sb-link" onclick="showPage('adopters')"><span class="sb-ico">❤️</span> Adopters</div>
+      <div class="sb-link" onclick="showPage('requests')">
+        <span class="sb-ico">📋</span> Requests
+        <span class="sb-nbadge" id="pendBadge" style="display:none">0</span>
+      </div>
+      <div class="sb-glabel">Analytics</div>
+      <div class="sb-link" onclick="showPage('report')"><span class="sb-ico">📊</span> Report</div>
+    </nav>
+    <div class="sb-foot">
+      <div class="sb-foot-text">BCSE302L · DA-II<br>24BAI1412</div>
+      <button class="btn-logout" onclick="doLogout()">Log out</button>
+    </div>
+  </aside>
+ 
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div class="tb-title" id="topTitle">Dashboard</div>
+      <div class="search-bar">
+        <span style="color:var(--stone);font-size:15px">⌕</span>
+        <input type="text" id="srch" placeholder="Search current table…" oninput="handleSearch(this.value)">
+      </div>
+    </div>
+ 
+    <div class="content">
+ 
+      <!-- Dashboard -->
+      <div id="pg-dashboard" class="page on">
+        <div class="sec-hd">
+          <div><div class="sec-title">Good to see you 👋</div>
+          <div class="sec-sub">Live overview of all shelter operations.</div></div>
+        </div>
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-hd">Recent Requests</div>
+            <div class="tw"><table><thead><tr><th>ID</th><th>Pet</th><th>Adopter</th><th>Status</th></tr></thead>
+            <tbody id="dReqs"></tbody></table></div>
+          </div>
+          <div class="card">
+            <div class="card-hd">Available Pets</div>
+            <div class="tw"><table><thead><tr><th>ID</th><th>Name</th><th>Breed</th><th>Shelter</th></tr></thead>
+            <tbody id="dPets"></tbody></table></div>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Shelters -->
+      <div id="pg-shelters" class="page">
+        <div class="sec-hd">
+          <div><div class="sec-title">Shelters</div><div class="sec-sub">Manage shelter locations and capacity.</div></div>
+          <button class="btn btn-fern" onclick="openModal('shelter')">＋ Add Shelter</button>
+        </div>
+        <div class="nav-row">
+          <button class="btn btn-ghost btn-sm" onclick="navTbl('shelter','first')">⏮ First</button>
+          <button class="btn btn-ghost btn-sm" onclick="navTbl('shelter','last')">Last ⏭</button>
+          <span class="rec-ct" id="ct-shelter"></span>
+        </div>
+        <div class="tw"><table>
+          <thead><tr><th>ID</th><th>Name</th><th>Location</th><th>Capacity</th><th>Actions</th></tr></thead>
+          <tbody id="tb-shelter"></tbody>
+        </table></div>
+      </div>
+ 
+      <!-- Pets -->
+      <div id="pg-pets" class="page">
+        <div class="sec-hd">
+          <div><div class="sec-title">Pets</div><div class="sec-sub">All animals across every shelter.</div></div>
+          <button class="btn btn-fern" onclick="openModal('pet')">＋ Add Pet</button>
+        </div>
+        <div class="nav-row">
+          <button class="btn btn-ghost btn-sm" onclick="navTbl('pet','first')">⏮ First</button>
+          <button class="btn btn-ghost btn-sm" onclick="navTbl('pet','last')">Last ⏭</button>
+          <span class="rec-ct" id="ct-pet"></span>
+        </div>
+        <div class="tw"><table>
+          <thead><tr><th>ID</th><th>Name</th><th>Breed</th><th>Status</th><th>Shelter</th><th>Actions</th></tr></thead>
+          <tbody id="tb-pet"></tbody>
+        </table></div>
+      </div>
+ 
+      <!-- Staff -->
+      <div id="pg-staff" class="page">
+        <div class="sec-hd">
+          <div><div class="sec-title">Staff</div><div class="sec-sub">Shelter employees and roles.</div></div>
+          <button class="btn btn-fern" onclick="openModal('staff')">＋ Add Staff</button>
+        </div>
+        <div class="nav-row">
+          <button class="btn btn-ghost btn-sm" onclick="navTbl('staff','first')">⏮ First</button>
+          <button class="btn btn-ghost btn-sm" onclick="navTbl('staff','last')">Last ⏭</button>
+          <span class="rec-ct" id="ct-staff"></span>
+        </div>
+        <div class="tw"><table>
+          <thead><tr><th>ID</th><th>Name</th><th>Role</th><th>Shelter</th><th>Actions</th></tr></thead>
+          <tbody id="tb-staff"></tbody>
+        </table></div>
+      </div>
+ 
+      <!-- Adopters -->
+      <div id="pg-adopters" class="page">
+        <div class="sec-hd">
+          <div><div class="sec-title">Adopters</div><div class="sec-sub">Registered adoption applicants.</div></div>
+          <button class="btn btn-fern" onclick="openModal('adopter')">＋ Add Adopter</button>
+        </div>
+        <div class="nav-row">
+          <button class="btn btn-ghost btn-sm" onclick="navTbl('adopter','first')">⏮ First</button>
+          <button class="btn btn-ghost btn-sm" onclick="navTbl('adopter','last')">Last ⏭</button>
+          <span class="rec-ct" id="ct-adopter"></span>
+        </div>
+        <div class="tw"><table>
+          <thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Address</th><th>Actions</th></tr></thead>
+          <tbody id="tb-adopter"></tbody>
+        </table></div>
+      </div>
+ 
+      <!-- Requests -->
+      <div id="pg-requests" class="page">
+        <div class="sec-hd">
+          <div><div class="sec-title">Adoption Requests</div><div class="sec-sub">Process all applications here.</div></div>
+          <button class="btn btn-fern" onclick="openModal('request')">＋ New Request</button>
+        </div>
+        <div class="nav-row">
+          <button class="btn btn-ghost btn-sm" onclick="navTbl('request','first')">⏮ First</button>
+          <button class="btn btn-ghost btn-sm" onclick="navTbl('request','last')">Last ⏭</button>
+          <span class="rec-ct" id="ct-request"></span>
+        </div>
+        <div class="tw"><table>
+          <thead><tr><th>ID</th><th>Date</th><th>Adopter</th><th>Pet</th><th>Staff</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="tb-request"></tbody>
+        </table></div>
+      </div>
+ 
+      <!-- Report -->
+      <div id="pg-report" class="page">
+        <div class="sec-hd">
+          <div><div class="sec-title">Adoption Report</div>
+          <div class="sec-sub">Adoption rate computation per shelter — Logical Processing Feature</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="loadReport()">↻ Refresh</button>
+        </div>
+        <div class="card">
+          <div class="card-hd">Adoption Rate by Shelter
+            <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:var(--dust);font-weight:500">Adopted ÷ Total × 100</span>
+          </div>
+          <div id="repBars"></div>
+        </div>
+        <div class="tw"><table>
+          <thead><tr><th>Shelter</th><th>Total Pets</th><th>Available</th><th>Adopted</th><th>Under Treatment</th><th>Adoption Rate %</th></tr></thead>
+          <tbody id="repTbl"></tbody>
+        </table></div>
+      </div>
+ 
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /appPage -->
+ 
+<!-- Modal -->
+<div class="overlay" id="ov" onclick="ovClick(event)">
+  <div class="modal">
+    <div class="modal-title" id="mTitle">Add Record</div>
+    <div id="mBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-fern" onclick="saveModal()">Save Record</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+ 
+<script>
+/* ════════════════════════════════════════════════════════
+   MOCK DATABASE  (stored in localStorage)
+════════════════════════════════════════════════════════ */
+const SEED = {
+  users: [
+    { id:1, username:'admin',  password:'password123', role:'admin' },
+    { id:2, username:'raunak', password:'password123', role:'staff' }
+  ],
+  shelters: [
+    { Shelter_ID:'S001', Name:'Happy Paws Shelter',   Location:'Downtown, Chennai', Capacity:50  },
+    { Shelter_ID:'S002', Name:'City Animal Rescue',   Location:'Northside, Chennai',Capacity:100 },
+    { Shelter_ID:'S003', Name:'Furry Friends Haven',  Location:'Vellore',           Capacity:75  }
+  ],
+  pets: [
+    { Pet_ID:'P001', Name:'Buddy',   Breed:'Golden Retriever', Status:'Available',      Shelter_ID:'S001' },
+    { Pet_ID:'P002', Name:'Whiskers',Breed:'Persian Cat',      Status:'Adopted',        Shelter_ID:'S001' },
+    { Pet_ID:'P003', Name:'Max',     Breed:'German Shepherd',  Status:'Available',      Shelter_ID:'S002' },
+    { Pet_ID:'P004', Name:'Luna',    Breed:'Labrador',         Status:'Available',      Shelter_ID:'S002' },
+    { Pet_ID:'P005', Name:'Milo',    Breed:'Beagle',           Status:'Under Treatment',Shelter_ID:'S003' },
+    { Pet_ID:'P006', Name:'Bella',   Breed:'Poodle',           Status:'Available',      Shelter_ID:'S003' }
+  ],
+  staff: [
+    { Staff_ID:'ST01', Name:'Alice Johnson', Role:'Manager',     Shelter_ID:'S001' },
+    { Staff_ID:'ST02', Name:'Bob Smith',     Role:'Veterinarian',Shelter_ID:'S001' },
+    { Staff_ID:'ST03', Name:'Charlie Davis', Role:'Caretaker',   Shelter_ID:'S002' },
+    { Staff_ID:'ST04', Name:'Diana Prince',  Role:'Manager',     Shelter_ID:'S002' },
+    { Staff_ID:'ST05', Name:'Ethan Hunt',    Role:'Veterinarian',Shelter_ID:'S003' }
+  ],
+  adopters: [
+    { Adopter_ID:'A001', Name:'Raunak Srivastav', Phone:'9876543210', Address:'123 Main St, Chennai'    },
+    { Adopter_ID:'A002', Name:'Priya Sharma',     Phone:'9123456789', Address:'45 Lake View, Vellore'   },
+    { Adopter_ID:'A003', Name:'Arjun Mehta',      Phone:'9988776655', Address:'78 Park Ave, Vellore'    },
+    { Adopter_ID:'A004', Name:'Sneha Patel',      Phone:'9001122334', Address:'12 Rose Garden, Chennai' }
+  ],
+  requests: [
+    { Request_ID:'R001', Request_Date:'2026-01-15', Status:'Approved', Adopter_ID:'A001', Pet_ID:'P002', Staff_ID:'ST01' },
+    { Request_ID:'R002', Request_Date:'2026-02-10', Status:'Pending',  Adopter_ID:'A002', Pet_ID:'P001', Staff_ID:'ST02' },
+    { Request_ID:'R003', Request_Date:'2026-03-01', Status:'Pending',  Adopter_ID:'A003', Pet_ID:'P003', Staff_ID:'ST03' },
+    { Request_ID:'R004', Request_Date:'2026-03-15', Status:'Rejected', Adopter_ID:'A004', Pet_ID:'P006', Staff_ID:'ST04' }
+  ]
+};
+ 
+/* ── localStorage persistence ────────────────── */
+function loadDB() {
+  try {
+    const saved = localStorage.getItem('pawpath_db');
+    if (saved) return JSON.parse(saved);
+  } catch {}
+  return JSON.parse(JSON.stringify(SEED)); // deep clone
+}
+ 
+function saveDB() {
+  try { localStorage.setItem('pawpath_db', JSON.stringify(DB)); } catch {}
+}
+ 
+let DB = loadDB();
+ 
+/* ── Auth persistence ────────────────────────── */
+let currentUser = null;
+try { currentUser = JSON.parse(sessionStorage.getItem('pawpath_user')); } catch {}
+ 
+/* ════════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  if (currentUser) enterApp(currentUser);
+  setTimeout(() => document.getElementById('splash').classList.add('off'), 700);
+});
+ 
+/* ════════════════════════════════════════════════════════
+   AUTH
+════════════════════════════════════════════════════════ */
+function switchTab(t) {
+  document.querySelectorAll('.at-btn').forEach((b,i) => b.classList.toggle('active', ['login','register'][i] === t));
+  document.getElementById('fLogin').classList.toggle('on', t === 'login');
+  document.getElementById('fReg').classList.toggle('on', t === 'register');
+}
+ 
+function doLogin() {
+  const username = document.getElementById('lUser').value.trim();
+  const password = document.getElementById('lPass').value;
+  const err = document.getElementById('lErr');
+  err.textContent = '';
+  if (!username || !password) { err.textContent = 'Please enter username and password.'; return; }
+  const user = DB.users.find(u => u.username === username && u.password === password);
+  if (!user) { err.textContent = 'Invalid username or password.'; return; }
+  const u = { id: user.id, username: user.username, role: user.role };
+  sessionStorage.setItem('pawpath_user', JSON.stringify(u));
+  currentUser = u;
+  enterApp(u);
+}
+ 
+function doRegister() {
+  const username = document.getElementById('rUser').value.trim();
+  const email    = document.getElementById('rEmail').value.trim();
+  const password = document.getElementById('rPass').value;
+  const err = document.getElementById('rErr');
+  err.style.color = 'var(--terracotta)'; err.textContent = '';
+  if (!username || !email || !password) { err.textContent = 'All fields are required.'; return; }
+  if (password.length < 6) { err.textContent = 'Password must be at least 6 characters.'; return; }
+  if (DB.users.find(u => u.username === username)) { err.textContent = 'Username already exists.'; return; }
+  const newUser = { id: Date.now(), username, email, password, role: 'staff' };
+  DB.users.push(newUser);
+  saveDB();
+  err.style.color = 'var(--fern)';
+  err.textContent = '✓ Account created! You can now sign in.';
+  setTimeout(() => switchTab('login'), 1500);
+}
+ 
+function enterApp(user) {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('appPage').classList.add('on');
+  document.getElementById('sbName').textContent = user.username;
+  document.getElementById('sbRole').textContent = user.role;
+  document.getElementById('sbAv').textContent   = user.username[0].toUpperCase();
+  showPage('dashboard');
+}
+ 
+function doLogout() {
+  sessionStorage.removeItem('pawpath_user');
+  currentUser = null;
+  document.getElementById('appPage').classList.remove('on');
+  document.getElementById('loginPage').style.display = '';
+  document.getElementById('lUser').value = '';
+  document.getElementById('lPass').value = '';
+}
+ 
+/* ════════════════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════════════════ */
+let curPage = 'dashboard';
+const titles = { dashboard:'Dashboard', shelters:'Shelters', pets:'Pets',
+                 staff:'Staff', adopters:'Adopters', requests:'Adoption Requests', report:'Report' };
+ 
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('on'));
+  document.getElementById('pg-' + name).classList.add('on');
+  document.querySelectorAll('.sb-link').forEach(l => {
+    if (l.getAttribute('onclick')?.includes(`'${name}'`)) l.classList.add('on');
+  });
+  document.getElementById('topTitle').textContent = titles[name];
+  document.getElementById('srch').value = '';
+  curPage = name;
+  if (name === 'dashboard') loadDashboard();
+  if (name === 'shelters')  renderTbl('shelter', DB.shelters);
+  if (name === 'pets')      renderTbl('pet', DB.pets);
+  if (name === 'staff')     renderTbl('staff', DB.staff);
+  if (name === 'adopters')  renderTbl('adopter', DB.adopters);
+  if (name === 'requests')  renderTbl('request', DB.requests);
+  if (name === 'report')    loadReport();
+  updateCounts();
+}
+ 
+/* ════════════════════════════════════════════════════════
+   DASHBOARD
+════════════════════════════════════════════════════════ */
+function loadDashboard() {
+  const pets     = DB.pets;
+  const total    = pets.length;
+  const adopted  = pets.filter(p => p.Status === 'Adopted').length;
+  const avail    = pets.filter(p => p.Status === 'Available').length;
+  const under    = pets.filter(p => p.Status === 'Under Treatment').length;
+  const pending  = DB.requests.filter(r => r.Status === 'Pending').length;
+  const rate     = total > 0 ? ((adopted/total)*100).toFixed(1) : 0;
+ 
+  const badge = document.getElementById('pendBadge');
+  badge.textContent = pending;
+  badge.style.display = pending > 0 ? '' : 'none';
+ 
+  const cards = [
+    { ico:'🐾', val:total,   lbl:'Total Pets',     col:'var(--fern)',        bg:'rgba(110,207,120,1)' },
+    { ico:'✅', val:avail,   lbl:'Available',      col:'var(--sky)',         bg:'rgba(122,184,212,1)' },
+    { ico:'🏠', val:adopted, lbl:'Adopted',        col:'var(--amber)',       bg:'rgba(232,184,74,1)'  },
+    { ico:'⏳', val:under,   lbl:'Under Treatment',col:'var(--terracotta)', bg:'rgba(212,113,74,1)'  },
+    { ico:'❤️', val:DB.adopters.length, lbl:'Adopters', col:'var(--fern)', bg:'rgba(110,207,120,1)' },
+    { ico:'📈', val:rate+'%',lbl:'Adoption Rate',  col:'var(--amber)',       bg:'rgba(232,184,74,1)'  },
+  ];
+ 
+  document.getElementById('statsGrid').innerHTML = cards.map(c => `
+    <div class="sc" style="border-top:2px solid ${c.col}">
+      <div class="sc-blob" style="background:${c.bg}"></div>
+      <div class="sc-icon">${c.ico}</div>
+      <div class="sc-num" style="color:${c.col}">${c.val}</div>
+      <div class="sc-lbl">${c.lbl}</div>
+    </div>`).join('');
+ 
+  // Recent requests (with joined names)
+  const reqs = DB.requests.slice(-5).reverse().map(r => {
+    const adopter = DB.adopters.find(a => a.Adopter_ID === r.Adopter_ID);
+    const pet     = DB.pets.find(p => p.Pet_ID === r.Pet_ID);
+    return `<tr><td><code>${r.Request_ID}</code></td>
+      <td>${pet?.Name||r.Pet_ID}</td>
+      <td>${adopter?.Name||r.Adopter_ID}</td>
+      <td>${bstat(r.Status)}</td></tr>`;
+  }).join('') || emptyRow(4);
+  document.getElementById('dReqs').innerHTML = reqs;
+ 
+  // Available pets
+  const availPets = DB.pets.filter(p => p.Status === 'Available').slice(0,5).map(p =>
+    `<tr><td><code>${p.Pet_ID}</code></td><td><b>${p.Name}</b></td><td>${p.Breed}</td><td>${p.Shelter_ID||'—'}</td></tr>`
+  ).join('') || emptyRow(4);
+  document.getElementById('dPets').innerHTML = availPets;
+}
+ 
+/* ════════════════════════════════════════════════════════
+   TABLE RENDER
+════════════════════════════════════════════════════════ */
+function renderTbl(type, rows) {
+  const tb = document.getElementById('tb-' + type);
+  if (!rows.length) { tb.innerHTML = emptyRow(7); updateCt(type, 0); return; }
+  tb.innerHTML = rows.map(r => rowHtml(type, r)).join('');
+  updateCt(type, rows.length);
+}
+ 
+function rowHtml(type, r) {
+  if (type === 'shelter') return `<tr>
+    <td><code>${r.Shelter_ID}</code></td><td><b>${r.Name}</b></td>
+    <td>${r.Location}</td><td>${r.Capacity}</td>
+    <td class="acts">
+      <button class="btn btn-ghost btn-xs" onclick='editRec("shelter","${r.Shelter_ID}")'>✏️ Edit</button>
+      <button class="btn btn-danger btn-xs" onclick="delRec('shelter','${r.Shelter_ID}')">🗑️</button>
+    </td></tr>`;
+ 
+  if (type === 'pet') return `<tr>
+    <td><code>${r.Pet_ID}</code></td><td><b>${r.Name}</b></td><td>${r.Breed}</td>
+    <td>${bpet(r.Status)}</td><td>${r.Shelter_ID||'—'}</td>
+    <td class="acts">
+  <button class="btn btn-ghost btn-xs" onclick='editRec("pet","${r.Pet_ID}")'>✏️ Edit</button>
+  <button class="btn btn-danger btn-xs" onclick="delRec('pet','${r.Pet_ID}')">🗑️</button>
+  <button class="btn btn-fern btn-xs" onclick="quickRequest('${r.Pet_ID}')">❤️ Request</button>
+</td></tr>`;
+ 
+  if (type === 'staff') return `<tr>
+    <td><code>${r.Staff_ID}</code></td><td><b>${r.Name}</b></td><td>${r.Role}</td>
+    <td>${r.Shelter_ID||'—'}</td>
+    <td class="acts">
+      <button class="btn btn-ghost btn-xs" onclick='editRec("staff","${r.Staff_ID}")'>✏️ Edit</button>
+      <button class="btn btn-danger btn-xs" onclick="delRec('staff','${r.Staff_ID}')">🗑️</button>
+    </td></tr>`;
+ 
+  if (type === 'adopter') return `<tr>
+    <td><code>${r.Adopter_ID}</code></td><td><b>${r.Name}</b></td>
+    <td>${r.Phone}</td><td>${r.Address}</td>
+    <td class="acts">
+      <button class="btn btn-ghost btn-xs" onclick='editRec("adopter","${r.Adopter_ID}")'>✏️ Edit</button>
+      <button class="btn btn-danger btn-xs" onclick="delRec('adopter','${r.Adopter_ID}')">🗑️</button>
+    </td></tr>`;
+ 
+  if (type === 'request') {
+    const adopter = DB.adopters.find(a => a.Adopter_ID === r.Adopter_ID);
+    const pet     = DB.pets.find(p => p.Pet_ID === r.Pet_ID);
+    const staff   = DB.staff.find(s => s.Staff_ID === r.Staff_ID);
+    return `<tr>
+      <td><code>${r.Request_ID}</code></td><td>${r.Request_Date}</td>
+      <td>${adopter?.Name||r.Adopter_ID}</td><td>${pet?.Name||r.Pet_ID}</td>
+      <td>${staff?.Name||r.Staff_ID||'—'}</td><td>${bstat(r.Status)}</td>
+      <td class="acts">
+  <button class="btn btn-fern btn-xs" onclick="approveReq('${r.Request_ID}')">✅ Approve</button>
+  <button class="btn btn-danger btn-xs" onclick="rejectReq('${r.Request_ID}')">❌ Reject</button>
+  </td></tr>`;
+  }
+  return '';
+}
+ 
+/* ════════════════════════════════════════════════════════
+   NAVIGATION (first/last)
+════════════════════════════════════════════════════════ */
+const dbKey = { shelter:'shelters', pet:'pets', staff:'staff', adopter:'adopters', request:'requests' };
+ 
+function navTbl(type, nav) {
+  const rows = DB[dbKey[type]];
+  if (!rows.length) return;
+  renderTbl(type, nav === 'first' ? [rows[0]] : [rows[rows.length - 1]]);
+}
+ 
+function updateCt(type, n) {
+  const el = document.getElementById('ct-' + type);
+  if (el) el.textContent = n + ' record' + (n !== 1 ? 's' : '');
+}
+ 
+function updateCounts() {
+  ['shelter','pet','staff','adopter','request'].forEach(t => {
+    updateCt(t, DB[dbKey[t]].length);
+  });
+}
+ 
+/* ════════════════════════════════════════════════════════
+   SEARCH
+════════════════════════════════════════════════════════ */
+let stimer;
+function handleSearch(q) {
+  clearTimeout(stimer);
+  stimer = setTimeout(() => {
+    const m = { shelters:'shelter', pets:'pet', staff:'staff', adopters:'adopter', requests:'request' };
+    const type = m[curPage]; if (!type) return;
+    if (!q) { renderTbl(type, DB[dbKey[type]]); return; }
+    const ql = q.toLowerCase();
+    let filtered;
+    if (type === 'shelter')  filtered = DB.shelters.filter(r => r.Name.toLowerCase().includes(ql) || r.Location.toLowerCase().includes(ql));
+    if (type === 'pet')      filtered = DB.pets.filter(r => r.Name.toLowerCase().includes(ql) || r.Breed.toLowerCase().includes(ql) || r.Status.toLowerCase().includes(ql));
+    if (type === 'staff')    filtered = DB.staff.filter(r => r.Name.toLowerCase().includes(ql) || r.Role.toLowerCase().includes(ql));
+    if (type === 'adopter')  filtered = DB.adopters.filter(r => r.Name.toLowerCase().includes(ql) || r.Phone.includes(ql));
+    if (type === 'request')  filtered = DB.requests.filter(r => r.Status.toLowerCase().includes(ql) || r.Adopter_ID.includes(ql) || r.Pet_ID.includes(ql));
+    renderTbl(type, filtered || []);
+  }, 200);
+}
+ 
+/* ════════════════════════════════════════════════════════
+   REPORT (Adoption Rate — Logical Processing Feature)
+════════════════════════════════════════════════════════ */
+function loadReport() {
+  const data = DB.shelters.map(s => {
+    const pets   = DB.pets.filter(p => p.Shelter_ID === s.Shelter_ID);
+    const total  = pets.length;
+    const adopted= pets.filter(p => p.Status === 'Adopted').length;
+    const avail  = pets.filter(p => p.Status === 'Available').length;
+    const under  = pets.filter(p => p.Status === 'Under Treatment').length;
+    const rate   = total > 0 ? ((adopted/total)*100).toFixed(1) : 0;
+    return { Shelter: s.Name, TotalPets: total, Available: avail, Adopted: adopted, UnderTreatment: under, AdoptionRate: rate };
+  });
+ 
+  document.getElementById('repBars').innerHTML = data.map(r => `
+    <div class="rep-bar">
+      <span class="rep-lbl">${r.Shelter}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${r.AdoptionRate}%"></div></div>
+      <span class="rep-pct">${r.AdoptionRate}%</span>
+    </div>`).join('');
+ 
+  document.getElementById('repTbl').innerHTML = data.map(r => `
+    <tr>
+      <td><b>${r.Shelter}</b></td><td>${r.TotalPets}</td>
+      <td><span class="badge b-g">${r.Available}</span></td>
+      <td><span class="badge b-s">${r.Adopted}</span></td>
+      <td><span class="badge b-a">${r.UnderTreatment}</span></td>
+      <td><b style="color:var(--fern)">${r.AdoptionRate}%</b></td>
+    </tr>`).join('');
+}
+ 
+/* ════════════════════════════════════════════════════════
+   MODAL — OPEN / CLOSE / SAVE
+════════════════════════════════════════════════════════ */
+let editId = null, editType = null;
+ 
+function shelterOpts(sel = '') { return DB.shelters.map(s => `<option value="${s.Shelter_ID}"${s.Shelter_ID===sel?' selected':''}>${s.Name} (${s.Shelter_ID})</option>`).join(''); }
+function staffOpts(sel = '')   { return DB.staff.map(s => `<option value="${s.Staff_ID}"${s.Staff_ID===sel?' selected':''}>${s.Name} (${s.Staff_ID})</option>`).join(''); }
+function adopterOpts(sel = '') { return DB.adopters.map(a => `<option value="${a.Adopter_ID}"${a.Adopter_ID===sel?' selected':''}>${a.Name} (${a.Adopter_ID})</option>`).join(''); }
+function petAvailOpts(sel = ''){ return DB.pets.filter(p => p.Status==='Available' || p.Pet_ID===sel).map(p => `<option value="${p.Pet_ID}"${p.Pet_ID===sel?' selected':''}>${p.Name} (${p.Pet_ID})</option>`).join(''); }
+ 
+const mforms = {
+  shelter: d => `
+    <div class="mfi"><label>Shelter Name</label><input id="f0" value="${d?.Name||''}"></div>
+    <div class="m2col">
+      <div class="mfi"><label>Location</label><input id="f1" value="${d?.Location||''}"></div>
+      <div class="mfi"><label>Capacity</label><input id="f2" type="number" value="${d?.Capacity||''}"></div>
+    </div>`,
+  pet: d => `
+    <div class="m2col">
+      <div class="mfi"><label>Pet Name</label><input id="f0" value="${d?.Name||''}"></div>
+      <div class="mfi"><label>Breed</label><input id="f1" value="${d?.Breed||''}"></div>
+    </div>
+    <div class="m2col">
+      <div class="mfi"><label>Status</label>
+        <select id="f2">
+          <option${d?.Status==='Available'?' selected':''}>Available</option>
+          <option${d?.Status==='Adopted'?' selected':''}>Adopted</option>
+          <option${d?.Status==='Under Treatment'?' selected':''}>Under Treatment</option>
+        </select>
+      </div>
+      <div class="mfi"><label>Shelter</label><select id="f3">${shelterOpts(d?.Shelter_ID)}</select></div>
+    </div>`,
+  staff: d => `
+    <div class="m2col">
+      <div class="mfi"><label>Staff Name</label><input id="f0" value="${d?.Name||''}"></div>
+      <div class="mfi"><label>Role</label><input id="f1" value="${d?.Role||''}"></div>
+    </div>
+    <div class="mfi"><label>Assigned Shelter</label><select id="f2">${shelterOpts(d?.Shelter_ID)}</select></div>`,
+  adopter: d => `
+    <div class="mfi"><label>Full Name</label><input id="f0" value="${d?.Name||''}"></div>
+    <div class="m2col">
+      <div class="mfi"><label>Phone</label><input id="f1" value="${d?.Phone||''}"></div>
+      <div class="mfi"><label>Address</label><input id="f2" value="${d?.Address||''}"></div>
+    </div>`,
+  request: d => `
+    <div class="mfi"><label>Request Date</label>
+      <input id="f0" type="date" value="${d?.Request_Date||new Date().toISOString().split('T')[0]}">
+    </div>
+    <div class="m2col">
+      <div class="mfi"><label>Adopter</label><select id="f1">${adopterOpts(d?.Adopter_ID)}</select></div>
+      <div class="mfi"><label>Pet (Available)</label><select id="f2">${petAvailOpts(d?.Pet_ID)}</select></div>
+    </div>
+    <div class="mfi"><label>Assigned Staff</label>
+      <select id="f3"><option value="">— Unassigned —</option>${staffOpts(d?.Staff_ID)}</select>
+    </div>
+    ${d ? `<div class="mfi"><label>Status</label>
+      <select id="f4">
+        <option${d.Status==='Pending'?' selected':''}>Pending</option>
+        <option${d.Status==='Approved'?' selected':''}>Approved</option>
+        <option${d.Status==='Rejected'?' selected':''}>Rejected</option>
+      </select></div>` : ''}`
+};
+ 
+function openModal(type, data = null) {
+  editId   = data ? (data.Shelter_ID || data.Pet_ID || data.Staff_ID || data.Adopter_ID || data.Request_ID) : null;
+  editType = type;
+  const lbl = type.charAt(0).toUpperCase() + type.slice(1);
+  document.getElementById('mTitle').textContent = (data ? '✏️ Edit ' : '＋ Add ') + lbl;
+  document.getElementById('mBody').innerHTML    = mforms[type](data);
+  document.getElementById('ov').classList.add('on');
+}
+ 
+function closeModal() { document.getElementById('ov').classList.remove('on'); }
+function ovClick(e)   { if (e.target.id === 'ov') closeModal(); }
+ 
+function editRec(type, id) {
+  const key = dbKey[type];
+  const pkMap = { shelter:'Shelter_ID', pet:'Pet_ID', staff:'Staff_ID', adopter:'Adopter_ID', request:'Request_ID' };
+  const data = DB[key].find(r => r[pkMap[type]] === id);
+  if (data) openModal(type, data);
+}
+ 
+/* ── Next ID generator ───────────────────────── */
+function nextId(arr, keyFn, prefix, pad) {
+  const nums = arr.map(r => parseInt(keyFn(r).replace(prefix, '')) || 0);
+  return prefix + String((Math.max(0, ...nums) + 1)).padStart(pad, '0');
+}
+ 
+function saveModal() {
+  const type = editType;
+  const v    = id => document.getElementById(id)?.value || '';
+ 
+  if (type === 'shelter') {
+    const data = { Name:v('f0'), Location:v('f1'), Capacity:parseInt(v('f2'))||0 };
+    if (!data.Name || !data.Location) { toast('Name and Location are required.','err'); return; }
+    if (editId) {
+      const i = DB.shelters.findIndex(r => r.Shelter_ID === editId);
+      DB.shelters[i] = { ...DB.shelters[i], ...data };
+    } else {
+      data.Shelter_ID = nextId(DB.shelters, r => r.Shelter_ID, 'S', 3);
+      DB.shelters.push(data);
+    }
+  }
+ 
+  else if (type === 'pet') {
+    const data = { Name:v('f0'), Breed:v('f1'), Status:v('f2'), Shelter_ID:v('f3') };
+    if (!data.Name || !data.Breed) { toast('Name and Breed are required.','err'); return; }
+    if (editId) {
+      const i = DB.pets.findIndex(r => r.Pet_ID === editId);
+      DB.pets[i] = { ...DB.pets[i], ...data };
+    } else {
+      data.Pet_ID = nextId(DB.pets, r => r.Pet_ID, 'P', 3);
+      DB.pets.push(data);
+    }
+  }
+ 
+  else if (type === 'staff') {
+    const data = { Name:v('f0'), Role:v('f1'), Shelter_ID:v('f2') };
+    if (!data.Name || !data.Role) { toast('Name and Role are required.','err'); return; }
+    if (editId) {
+      const i = DB.staff.findIndex(r => r.Staff_ID === editId);
+      DB.staff[i] = { ...DB.staff[i], ...data };
+    } else {
+      data.Staff_ID = nextId(DB.staff, r => r.Staff_ID, 'ST', 2);
+      DB.staff.push(data);
+    }
+  }
+ 
+  else if (type === 'adopter') {
+    const data = { Name:v('f0'), Phone:v('f1'), Address:v('f2') };
+    if (!data.Name || !data.Phone) { toast('Name and Phone are required.','err'); return; }
+    if (editId) {
+      const i = DB.adopters.findIndex(r => r.Adopter_ID === editId);
+      DB.adopters[i] = { ...DB.adopters[i], ...data };
+    } else {
+      data.Adopter_ID = nextId(DB.adopters, r => r.Adopter_ID, 'A', 3);
+      DB.adopters.push(data);
+    }
+  }
+ 
+  else if (type === 'request') {
+    const data = { Request_Date:v('f0'), Adopter_ID:v('f1'), Pet_ID:v('f2'), Staff_ID:v('f3')||null };
+    if (!data.Request_Date || !data.Adopter_ID || !data.Pet_ID) { toast('Date, Adopter & Pet are required.','err'); return; }
+    if (editId) {
+      const newStatus = v('f4');
+      const i = DB.requests.findIndex(r => r.Request_ID === editId);
+      const oldStatus = DB.requests[i].Status;
+      DB.requests[i] = { ...DB.requests[i], ...data, Status: newStatus };
+      // Auto-adopt: if approved, mark pet as Adopted
+      if (newStatus === 'Approved' && oldStatus !== 'Approved') {
+        const pi = DB.pets.findIndex(p => p.Pet_ID === DB.requests[i].Pet_ID);
+        if (pi >= 0) DB.pets[pi].Status = 'Adopted';
+      }
+    } else {
+      data.Request_ID = nextId(DB.requests, r => r.Request_ID, 'R', 3);
+      data.Status = 'Pending';
+      DB.requests.push(data);
+    }
+  }
+ 
+  saveDB();
+  toast(editId ? 'Record updated ✓' : 'Record added ✓', 'ok');
+  closeModal();
+ 
+  // Refresh current view
+  const m = { shelters:'shelter', pets:'pet', staff:'staff', adopters:'adopter', requests:'request' };
+  if (m[curPage]) renderTbl(m[curPage], DB[dbKey[m[curPage]]]);
+  if (curPage === 'dashboard') loadDashboard();
+  if (curPage === 'report')    loadReport();
+}
+ 
+function delRec(type, id) {
+  if (!confirm(`Delete this ${type}?\nThis cannot be undone.`)) return;
+  const pkMap = { shelter:'Shelter_ID', pet:'Pet_ID', staff:'Staff_ID', adopter:'Adopter_ID', request:'Request_ID' };
+  DB[dbKey[type]] = DB[dbKey[type]].filter(r => r[pkMap[type]] !== id);
+  saveDB();
+  toast('Deleted.', 'ok');
+  const m = { shelters:'shelter', pets:'pet', staff:'staff', adopters:'adopter', requests:'request' };
+  if (m[curPage]) renderTbl(m[curPage], DB[dbKey[m[curPage]]]);
+  if (curPage === 'dashboard') loadDashboard();
+}
+function approveReq(reqId){
+  const req = DB.requests.find(r => r.Request_ID === reqId);
+  if (!req) return;
+
+  if(req.Status !== "Pending"){
+    return toast("Already processed ⚠️","warn");
+  }
+
+  req.Status = "Approved";
+  const pet = DB.pets.find(p => p.Pet_ID === req.Pet_ID);
+  if(pet) pet.Status = "Adopted";
+  saveDB();
+  renderTbl('request', DB.requests);
+  renderTbl('pet', DB.pets);
+  toast("Request Approved ✅","ok");
+}
+
+function rejectReq(reqId){
+  const req = DB.requests.find(r => r.Request_ID === reqId);
+  if (!req) return;
+  if(req.Status !== "Pending"){
+    return toast("Already processed ⚠️","warn");
+  }
+  req.Status = "Rejected";
+  saveDB();
+  renderTbl('request', DB.requests);
+  toast("Request Rejected ❌","warn");
+}
+ 
+/* ════════════════════════════════════════════════════════
+   BADGES
+════════════════════════════════════════════════════════ */
+function bpet(s)  { const m={Available:'b-g',Adopted:'b-s','Under Treatment':'b-a'}; return `<span class="badge ${m[s]||'b-m'}">${s}</span>`; }
+function bstat(s) { const m={Pending:'b-a',Approved:'b-g',Rejected:'b-r'};           return `<span class="badge ${m[s]||'b-m'}">${s}</span>`; }
+ 
+/* ════════════════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════════════════ */
+let tTimer;
+function toast(msg, type = 'ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast t-${type} on`;
+  clearTimeout(tTimer);
+  tTimer = setTimeout(() => t.classList.remove('on'), 3000);
+}
+ 
+/* ════════════════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════════════════ */
+function emptyRow(cols) {
+  return `<tr class="empty-row"><td colspan="${cols}" style="text-align:center;padding:28px;color:var(--stone)">No records found.</td></tr>`;
+}
+</script>
+</body>
+</html>
