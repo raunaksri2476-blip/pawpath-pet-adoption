@@ -1,67 +1,84 @@
 # 🐾 PawPath — Pet Adoption & Shelter Management System
-**BCSE302L DA-II | Raunak Srivastav | 24BAI1412**
+
+A full-stack web application designed to streamline pet adoption and shelter management.
 
 ---
 
-## Quick Start (3 Steps)
+## 🚀 Features
 
-### 1. Setup Database
-- Open **phpMyAdmin** or MySQL CLI
-- Run `schema.sql` — this creates the database, all tables, and seed data
+* 🐶 Manage Pets (Add / Edit / Delete)
+* 🏠 Shelter Management
+* 👤 Adopter Registration
+* 📩 Adoption Requests
+* ✅ Admin Approval / Rejection System
+* 📊 Dashboard with Real-time Stats
 
-### 2. Install & Run Backend
+---
+
+## 🛠️ Tech Stack
+
+* Frontend: HTML, CSS, JavaScript
+* Backend: Node.js (Express)
+* Database: MySQL
+* Authentication: bcrypt.js
+
+---
+
+## 📸 Screenshots
+
+### 🔹 Dashboard
+
+Shows total pets, adoption stats, and recent requests.
+
+### 🔹 Pets Management
+
+View and manage all pets with status tracking.
+
+### 🔹 Shelters
+
+Manage shelter locations and capacity.
+
+### 🔹 Adoption Requests
+
+Approve or reject adoption requests.
+
+---
+
+## ⚙️ Installation
+
 ```bash
-# In the project folder:
+git clone https://github.com/raunaksri2476-blip/pawpath-pet-adoption.git
+cd pawpath-pet-adoption
 npm install
 node server.js
 ```
-Server starts at → **http://localhost:3000**
-
-> If your MySQL has a password, edit line 22 of `server.js`:
-> `password: 'your_password_here'`
-
-### 3. Open App
-Visit **http://localhost:3000** in your browser.
 
 ---
 
-## Default Login
-| Username | Password | Role  |
-|----------|----------|-------|
-| admin    | password | Admin |
-| raunak   | password | Staff |
+## 🔐 Default Login
 
----
-
-## Project Structure
 ```
-pawpath/
-├── server.js          ← Node.js + Express backend (all API routes)
-├── schema.sql         ← MySQL database schema + seed data
-├── package.json       ← Dependencies
-└── public/
-    └── index.html     ← Complete frontend (login + dashboard)
+Username: admin  
+Password: password
 ```
 
 ---
 
-## Features (DA-II Checklist ✅)
-| Requirement | Implemented |
-|---|---|
-| Login system | ✅ bcrypt hashed passwords, session auth |
-| View all records | ✅ All 5 tables |
-| First / Last navigation | ✅ All tables |
-| Search | ✅ Real-time search per table |
-| Insert (from frontend) | ✅ Modal forms |
-| Update (from frontend) | ✅ Pre-filled edit modals |
-| Delete (from frontend) | ✅ With confirmation |
-| Logical processing | ✅ Adoption Rate % per shelter (Report page) |
-| Auto-adopt trigger | ✅ Pet status changes to "Adopted" on approval |
+## 📌 Future Improvements
+
+* Image upload for pets
+* User roles (Admin / Staff / Adopter)
+* Email notifications
+* Deployment on cloud
 
 ---
 
-## Tech Stack
-- **Frontend**: HTML5, CSS3, Vanilla JS
-- **Backend**: Node.js + Express
-- **Database**: MySQL
-- **Auth**: express-session + bcryptjs
+## 👨‍💻 Author
+
+**Raunak Srivastav**
+BSCSE302L — DA-II
+VIT
+
+---
+
+⭐ If you like this project, give it a star!
