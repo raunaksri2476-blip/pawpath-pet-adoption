@@ -130,6 +130,6 @@ app.get('*', (req, res) => {
 // ================= START =================
 
 app.listen(PORT, () => {
-  console.log(`🔥 Server running at http://localhost:${PORT}`);
+  console.log(`🔥 Server running on port ${PORT}`);
   console.log(`Login → admin / password`);
 });
